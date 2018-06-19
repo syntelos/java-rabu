@@ -1,0 +1,7 @@
+# 
+# Configuration parameters recognized by 'javab'.
+# See https://github.com/syntelos/sh-javab
+#
+name=java-rabu
+version=1
+main-class=syntelos.rabu.Test

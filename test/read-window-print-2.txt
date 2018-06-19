@@ -1,0 +1,2 @@
+read test/lorum-ipsum-3959.txt window 100 100 print
+0
