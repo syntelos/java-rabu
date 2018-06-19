@@ -278,6 +278,35 @@ public class RandomAccessBuffer
 		return false;
 	    }
 	}
+	protected int get(Window w, State s, int x){
+
+	    int i = this.internal(w,s,x);
+	    int q = this.available(w,s);
+
+	    if (0 < q && -1 < i){
+
+		return this.buffer[i];
+	    }
+	    else {
+		throw new IllegalArgumentException(String.valueOf(x));
+	    }
+	}
+	protected boolean set(Window w, State s, int x, int v){
+
+	    int i = this.internal(w,s,x);
+	    int q = this.available(w,s);
+
+	    if (0 < q && -1 < i){
+
+		this.buffer[i] = (byte)(v & 0xff);
+
+		return true;
+	    }
+	    else {
+		throw new IllegalArgumentException(String.valueOf(x));
+	    }
+	}
+
     }
     /**
      * External offset
@@ -322,6 +351,9 @@ public class RandomAccessBuffer
 
 	return this.state.external;
     }
+    /**
+     * Same as {@link #length()}
+     */
     public int available(){
 
 	return this.buffer.available(this.window,this.state);
@@ -351,5 +383,35 @@ public class RandomAccessBuffer
     public boolean write(byte[] b, int o, int l){
 
 	return this.buffer.write(this.window,this.state,b,o,l);
+    }
+    /**
+     * Same as {@link #available()}.
+     * 
+     * @see #get(int)
+     * @see #set(int,int)
+     */
+    public int length(){
+
+	return this.buffer.available(this.window,this.state);
+    }
+    /**
+     * Random access constrainted by window and read.
+     * 
+     * @see #length()
+     * @see #set(int,int)
+     */
+    public int get(int x){
+
+	return this.buffer.get(this.window,this.state,x);
+    }
+    /**
+     * Random access constrainted by window and read.
+     * 
+     * @see #length()
+     * @see #get(int)
+     */
+    public boolean set(int x, int v){
+
+	return this.buffer.set(this.window,this.state,x,v);
     }
 }
