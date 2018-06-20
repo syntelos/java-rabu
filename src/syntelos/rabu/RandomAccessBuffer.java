@@ -18,7 +18,14 @@
 package syntelos.rabu;
 
 /**
- * Buffer handling and windowing.
+ * Buffer handling and windowing.  The "read" interface is stateful,
+ * having an internal read position (offset pointer).  
+ * 
+ * The "write" interface will grow the buffer.  This design element
+ * needs refinement.  Changing the buffer memory region is a critical
+ * operation, which requires representation.
+ * 
+ * The random access interface (get/set) is stateless.
  */
 public class RandomAccessBuffer
     extends Object
@@ -37,11 +44,11 @@ public class RandomAccessBuffer
 	/**
 	 * Aperture floor as index (from zero) relative to buffer origin.
 	 */
-	protected final int delta;
+	protected int delta;
 	/**
 	 * Aperture ceiling as count from {@link #delta}.
 	 */
-	protected final int length;
+	protected int length;
 
 
 	Window(){
@@ -306,7 +313,40 @@ public class RandomAccessBuffer
 		throw new IllegalArgumentException(String.valueOf(x));
 	    }
 	}
+	protected int indexOf(Window w, State s, int c){
 
+	    int x = s.external;
+	    int i = this.internal(w,s);
+	    int q = this.available(w,s);
+
+	    if (-1 < i){
+
+		while (i < q){
+
+		    if (c == (this.buffer[i] & 0xFF)){
+
+			return x;
+		    }
+		    else {
+			i++; x++;
+		    }
+		}
+	    }
+	    return -1;
+	}
+	protected String substring(Window w, State s, int o, int l){
+
+	    int i = this.internal(w,s,o);
+	    int q = Math.min(l,this.available(w,s));
+
+	    if (0 < q){
+
+		return new String(this.buffer,0,i,q);
+	    }
+	    else {
+		throw new IllegalArgumentException(String.format("offset: %d, length: %d",o,l));
+	    }
+	}
     }
     /**
      * External offset
@@ -413,5 +453,19 @@ public class RandomAccessBuffer
     public boolean set(int x, int v){
 
 	return this.buffer.set(this.window,this.state,x,v);
+    }
+    /**
+     * 
+     */
+    public int indexOf(int c){
+
+	return this.buffer.indexOf(this.window,this.state,c);
+    }
+    /**
+     * 
+     */
+    public String substring(int o, int l){
+
+	return this.buffer.substring(this.window,this.state,o,l);
     }
 }
