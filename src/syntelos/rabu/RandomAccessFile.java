@@ -77,4 +77,25 @@ public class RandomAccessFile
 	    }
 	}
     }
+    public int write(File file){
+
+	FileOutputStream fout = null;
+	try {
+	    fout = new FileOutputStream(file);
+
+	    return this.copy(fout);
+	}
+	catch (IOException iox){
+	    throw new IllegalArgumentException(file.getPath(),iox);
+	}
+	finally {
+	    if (null != fout){
+		try {
+		    fout.close();
+		}
+		catch (Throwable t){
+		}
+	    }
+	}
+    }
 }

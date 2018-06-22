@@ -17,6 +17,10 @@
  */
 package syntelos.rabu;
 
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+
 /**
  * Buffer handling and windowing.  The "read" interface is stateful,
  * having an internal read position (offset pointer).  
@@ -262,15 +266,9 @@ public class RandomAccessBuffer
 
 		int q = (i+l);
 
-		if (q >= this.length){
+		if (q > this.buffer.length){
 
-		    if (q > this.buffer.length){
-
-			q &= 0x7FFFFF00;
-			q += 0x100;
-
-			this.grow(q);
-		    }
+		    this.grow(ceil(q));
 		}
 
 		System.arraycopy(b,o,this.buffer,i,l);
@@ -284,6 +282,43 @@ public class RandomAccessBuffer
 	    else {
 		return false;
 	    }
+	}
+	protected boolean copy(Window w, State s, InputStream in, int count)
+	    throws IOException
+	{
+	    int z = floor(count);
+	    byte[] b = new byte[z];
+	    int r;
+
+	    while (0 < count && 0 < (r = in.read(b,0,z))){
+
+		if (!this.write(w,s,b,0,r)){
+		    return false;
+		}
+		else {
+		    count -= r;
+		    if (z > count){
+			z = count;
+		    }
+		}
+	    }
+	    return true;
+	}
+	protected int copy(Window w, State s, OutputStream out)
+	    throws IOException
+	{
+	    int z = floor(this.available(w,s));
+	    byte[] b = new byte[z];
+	    int r;
+	    int c = 0;
+
+	    while (0 < (r = this.read(w,s,b,0,z))){
+
+		out.write(b,0,r);
+
+		c += r;
+	    }
+	    return c;
 	}
 	protected int get(Window w, State s, int x){
 
@@ -346,6 +381,24 @@ public class RandomAccessBuffer
 	    else {
 		throw new IllegalArgumentException(String.format("offset: %d, length: %d",o,l));
 	    }
+	}
+
+	protected final static int ceil(int q){
+	    if (0x100 > q)
+		return 0x100;
+	    else {
+		q &= 0x7FFFFF00;
+		q += 0x100;
+		return q;
+	    }
+	}
+	protected final static int floor(int q){
+	    if (0x100 > q)
+		return q;
+	    else if (0x200 < q)
+		return 0x200;
+	    else
+		return 0x100;
 	}
     }
     /**
@@ -423,6 +476,22 @@ public class RandomAccessBuffer
     public boolean write(byte[] b, int o, int l){
 
 	return this.buffer.write(this.window,this.state,b,o,l);
+    }
+    /**
+     * Write to buffer
+     */
+    public boolean copy(InputStream in, int count)
+	throws IOException
+    {
+	return this.buffer.copy(this.window,this.state,in,count);
+    }
+    /**
+     * Read from buffer
+     */
+    public int copy(OutputStream out)
+	throws IOException
+    {
+	return this.buffer.copy(this.window,this.state,out);
     }
     /**
      * Same as {@link #available()}.

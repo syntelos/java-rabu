@@ -63,7 +63,8 @@ public final class Test {
 	echo   ("","Print state."),
 	print  ("","Read from buffer."),
 	read   ("<file>","Write to buffer.",Operand.STR),
-	window ("<offset> <count>","Constrain buffer to window.",Operand.INT,Operand.INT);
+	window ("<offset> <count>","Constrain buffer to window.",Operand.INT,Operand.INT),
+	copy   ("<file>","Read from buffer.",Operand.STR);
 
 
 	private final static Object[] NARGS = new Object[]{};
@@ -137,7 +138,7 @@ public final class Test {
 
 	public File file;
 
-	public int read;
+	public int read = 0, wrote = 0;
 
 
 	public State(){
@@ -145,14 +146,15 @@ public final class Test {
 	}
 
 
-	protected boolean echo(){
+	protected boolean echo(Instruction i){
+	    out.println(i);
 	    /*
 	     */
 	    if (null != this.file)
 
-		out.printf("(test file: %s, read: %d)%n", this.file.getPath(), this.read);
+		out.printf("%s test file: %s, read: %d, wrote: %d%n", i, this.file.getPath(), this.read, this.wrote);
 	    else
-		out.printf("(test read: %d)%n", this.read);
+		out.printf("%s test read: %d, wrote: %d%n", i, this.read, this.wrote);
 	    /*
 	     */
 	    if (null != raf){
@@ -163,13 +165,15 @@ public final class Test {
 
 		RandomAccessBuffer.State state = raf.state;
 
-		out.printf("(rabu window offset: %d, length: %d)%n", window.delta, window.length);
-		out.printf("(rabu buffer length: %d, size: %d)%n", buffer.length,buffer.buffer.length);
-		out.printf("(rabu i/o pointer internal: %d, external: %d)%n", window.internal(state), state.external);
+		out.printf("%s rabu window offset: %d, length: %d%n", i, window.delta, window.length);
+		out.printf("%s rabu buffer length: %d, size: %d%n", i, buffer.length,buffer.buffer.length);
+		out.printf("%s rabu i/o pointer internal: %d, external: %d%n", i, window.internal(state), state.external);
 	    }
+	    out.println();
+
 	    return true;
 	}
-	protected boolean print(){
+	protected boolean print(Instruction i){
 	    /*
 	     */
 	    if (null != this.raf){
@@ -191,11 +195,11 @@ public final class Test {
 			}
 			out.println();
 			if (c == av){
-			    out.printf("(test print success [read %d/%d])%n",c,av);
+			    out.printf("%s test print success [read %d/%d])%n",i,c,av);
 			    return true;
 			}
 			else {
-			    out.printf("(test print failure [read %d/%d])%n",c,av);
+			    out.printf("%s test print failure [read %d/%d])%n",i,c,av);
 			    return false;
 			}
 		    }
@@ -210,31 +214,31 @@ public final class Test {
 
 			if (av != r){
 
-			    out.printf("(test print failure [read %d/%d])%n",r,av);
+			    out.printf("%s test print failure [read %d/%d]%n",i,r,av);
 			    return false;
 			}
 			else {
 
-			    out.printf("(test print success [read %d])%n",av);
+			    out.printf("%s test print success [read %d]%n",i,av);
 			    return true;
 			}
 		    }
 		    else {
-			out.println("(test print [available 0] failed)");
+			out.printf("%s test print [available 0] failed%n",i);
 			return false;
 		    }
 		}
 		else {
-		    out.println("(test print [seek 0] failed)");
+		    out.printf("%s test print [seek 0] failed%n",i);
 		    return false;
 		}
 	    }
 	    else {
-		out.println("(test print missing rabu)");
+		out.printf("%s test print missing rabu%n",i);
 		return false;
 	    }
 	}
-	protected boolean read(String arg){
+	protected boolean read(Instruction i, String arg){
 	    File file = new File(arg);
 	    if (file.isFile() && file.canRead()){
 
@@ -244,7 +248,7 @@ public final class Test {
 
 		this.read = raf.read(file);
 
-		echo();
+		echo(i);
 
 		if (0 < this.read){
 
@@ -255,12 +259,23 @@ public final class Test {
 	    }
 	    return false;
 	}
-	protected boolean window(int x, int c){
+	protected boolean window(Instruction i, int x, int c){
 	    raf = new RandomAccessFile(raf,new RandomAccessBuffer.Window(x,c));
 
 	    super.seek(x);
 
-	    return echo();
+	    return echo(i);
+	}
+	protected boolean copy(Instruction i, String arg){
+	    File file = new File(arg);
+
+	    this.file = file;
+
+	    this.wrote = raf.write(file);
+
+	    echo(i);
+
+	    return true;
 	}
     }
     /**
@@ -268,42 +283,73 @@ public final class Test {
      */
     public static class Instruction {
 
-	public final Operator command;
+	public final Operator operator;
 
 	public final Object[] operands;
 
+	public final String string;
+
 
 	public Instruction(Operator c, Object... o){
-	    this.command = c;
+	    this.operator = c;
 	    this.operands = o;
+	    this.string = toString(this);
 	}
 
 
 	public boolean proc(State s){
-	    switch(command){
+	    switch(operator){
 	    case echo:
 		{
-		    return s.echo();
+		    return s.echo(this);
 		}
 	    case print:
 		{
-		    return s.print();
+		    return s.print(this);
 		}
 	    case read:
 		{
 		    String o = (String)operands[0];
 
-		    return s.read(o);
+		    return s.read(this,o);
 		}
 	    case window:
 		{
 		    int o = ((Integer)operands[0]).intValue();
 		    int c = ((Integer)operands[1]).intValue();
-		    return s.window(o,c);
+		    return s.window(this,o,c);
+		}
+	    case copy:
+		{
+		    String o = (String)operands[0];
+
+		    return s.copy(this,o);
 		}
 	    default:
-		throw new IllegalStateException(this.command.name());
+		throw new IllegalStateException(this.operator.name());
 	    }
+	}
+
+
+	public String toString(){
+	    return this.string;
+	}
+
+	private final static String toString(Instruction i){
+	    StringBuilder string = new StringBuilder();
+	    {
+		string.append('(');
+		string.append(i.operator.name());
+
+		int count = i.operands.length;
+		for (int cc = 0; cc < count; cc++){
+		    Object o = i.operands[cc];
+		    string.append(' ');
+		    string.append(o);
+		}
+		string.append(')');
+	    }
+	    return string.toString();
 	}
     }
 
@@ -337,7 +383,7 @@ public final class Test {
 
 		unk.printStackTrace();
 
-		err.printf("syntelos.rabu.Test error: unrecognized command term '%s'.%n",arg);
+		err.printf("syntelos.rabu.Test error: unrecognized operator term '%s'.%n",arg);
 
 		System.exit(1);
 	    }
