@@ -24,7 +24,7 @@ import java.io.IOException;
 
 
 /**
- * File handling over {@link RandomAccessBuffer rabu}.
+ * File handling over {@link RandomAccessBuffer rabu} copies file to buffer.
  */
 public class RandomAccessFile
     extends RandomAccessBuffer
@@ -83,7 +83,17 @@ public class RandomAccessFile
 	try {
 	    fout = new FileOutputStream(file);
 
-	    return this.copy(fout);
+	    byte[] b = new byte[0x200];
+	    int r, c = 0;
+
+	    while (0 < (r = this.read(b,0,0x200))){
+
+		c += r;
+
+		fout.write(b,0,r);
+
+	    }
+	    return c;
 	}
 	catch (IOException iox){
 	    throw new IllegalArgumentException(file.getPath(),iox);

@@ -1,0 +1,2 @@
+read test/lorum-ipsum-753.txt window 100 100 write /tmp/rabu-test_read-window-write-1_100.txt
+0

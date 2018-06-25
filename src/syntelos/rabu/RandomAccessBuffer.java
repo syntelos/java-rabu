@@ -20,6 +20,7 @@ package syntelos.rabu;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintStream;
 
 /**
  * Buffer handling and windowing.  The "read" interface is stateful,
@@ -108,7 +109,7 @@ public class RandomAccessBuffer
      * implement a window / aperture constraint.
      */
     protected static class Buffer
-	extends Object
+	extends BufferPrinter
     {
 	/**
 	 * Occasionally optimistic
@@ -182,6 +183,9 @@ public class RandomAccessBuffer
 		return (this.length-i);
 	    }
 	}
+	/**
+	 * Read from buffer with effect to {@link State}.
+	 */
 	protected int read(Window w, State s){
 
 	    int i = this.internal(w,s);
@@ -214,6 +218,35 @@ public class RandomAccessBuffer
 		return -1;
 	    }
 	}
+	/**
+	 * No effect to {@link State}
+	 */
+	protected boolean print(Window w, State s){
+
+	    return this.print(w,s,System.out);
+	}
+	protected boolean print(Window w, State s, PrintStream out){
+
+	    int i = this.internal(w,s);
+	    int q = this.available(w,s);
+
+	    if (0 < q){
+
+		super.print(this.buffer,i,q,out);
+
+		return true;
+	    }
+	    else {
+		return false;
+	    }
+	}
+	protected boolean reset(Window w, State s){
+
+	    return this.seek(w,s,0);
+	}
+	/**
+	 * Change {@link State}
+	 */
 	protected boolean seek(Window w, State s, int external){
 
 	    int i = this.internal(w,s,external);
@@ -222,12 +255,17 @@ public class RandomAccessBuffer
 
 		s.external = external;
 
+		super.seek(external);
+
 		return true;
 	    }
 	    else {
 		return false;
 	    }
 	}
+	/**
+	 * Write to buffer with effect to {@link State}
+	 */
 	protected boolean write(Window w, State s, int b){
 	    /*
 	     * [TODO]    Constrain WRITE by WINDOW
@@ -440,6 +478,9 @@ public class RandomAccessBuffer
     }
 
 
+    /**
+     * @return User I/O pointer (buffer offset)
+     */
     public int offset(){
 
 	return this.state.external;
@@ -451,10 +492,21 @@ public class RandomAccessBuffer
 
 	return this.buffer.available(this.window,this.state);
     }
+    public boolean reset(){
+
+	return this.buffer.reset(this.window,this.state);
+    }
+    /**
+     * @param external User I/O pointer (buffer offset)
+     */
     public boolean seek(int external){
 
 	return this.buffer.seek(this.window,this.state,external);
     }
+    /**
+     * Employ {@link Window} and {@link State} to return a byte from
+     * the {@link Buffer}, incrementing the user I/O pointer.
+     */
     public int read(){
 
 	return this.buffer.read(this.window,this.state);
@@ -469,6 +521,10 @@ public class RandomAccessBuffer
 	    throw new IllegalArgumentException();
 	}
     }
+    /**
+     * Employ {@link Window} and {@link State} to write a byte to the
+     * {@link Buffer}, incrementing the user I/O pointer.
+     */
     public boolean write(int b){
 
 	return this.buffer.write(this.window,this.state,b);
@@ -478,7 +534,8 @@ public class RandomAccessBuffer
 	return this.buffer.write(this.window,this.state,b,o,l);
     }
     /**
-     * Write to buffer
+     * Write to buffer without incrementing the user I/O pointer
+     * ({@link State}).
      */
     public boolean copy(InputStream in, int count)
 	throws IOException
@@ -486,12 +543,31 @@ public class RandomAccessBuffer
 	return this.buffer.copy(this.window,this.state,in,count);
     }
     /**
-     * Read from buffer
+     * Read from buffer without incrementing the user I/O pointer
+     * ({@link State}).
      */
     public int copy(OutputStream out)
 	throws IOException
     {
 	return this.buffer.copy(this.window,this.state,out);
+    }
+    /**
+     * Copy buffer to (standard) output using I/O pointer {@link
+     * State} with external offsets.  This operation has no effect on
+     * the read state.
+     */
+    public boolean print(){
+
+	return this.buffer.print(this.window,this.state);
+    }
+    /**
+     * Copy buffer to (argument) output using I/O pointer {@link
+     * State} with external offsets.  This operation has no effect on
+     * the read state.
+     */
+    public boolean print(PrintStream out){
+
+	return this.buffer.print(this.window,this.state,out);
     }
     /**
      * Same as {@link #available()}.

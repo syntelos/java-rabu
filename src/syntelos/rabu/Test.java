@@ -64,7 +64,9 @@ public final class Test {
 	print  ("","Read from buffer."),
 	read   ("<file>","Write to buffer.",Operand.STR),
 	window ("<offset> <count>","Constrain buffer to window.",Operand.INT,Operand.INT),
-	copy   ("<file>","Read from buffer.",Operand.STR);
+	write  ("<file>","Read from buffer.",Operand.STR),
+	seek   ("<offset>","Set I/O pointer offset.",Operand.INT),
+	reset  ("","Set I/O pointer offset to zero.");
 
 
 	private final static Object[] NARGS = new Object[]{};
@@ -130,9 +132,7 @@ public final class Test {
     /**
      * 
      */
-    public static class State
-	extends BufferPrinter
-    {
+    public static class State {
 
 	public RandomAccessFile raf;
 
@@ -152,9 +152,9 @@ public final class Test {
 	     */
 	    if (null != this.file)
 
-		out.printf("%s test file: %s, read: %d, wrote: %d%n", i, this.file.getPath(), this.read, this.wrote);
+		out.printf("%s test file: %s, read: %d, wrote: %d.%n", i, this.file.getPath(), this.read, this.wrote);
 	    else
-		out.printf("%s test read: %d, wrote: %d%n", i, this.read, this.wrote);
+		out.printf("%s test read: %d, wrote: %d.%n", i, this.read, this.wrote);
 	    /*
 	     */
 	    if (null != raf){
@@ -165,9 +165,9 @@ public final class Test {
 
 		RandomAccessBuffer.State state = raf.state;
 
-		out.printf("%s rabu window offset: %d, length: %d%n", i, window.delta, window.length);
-		out.printf("%s rabu buffer length: %d, size: %d%n", i, buffer.length,buffer.buffer.length);
-		out.printf("%s rabu i/o pointer internal: %d, external: %d%n", i, window.internal(state), state.external);
+		out.printf("%s rabu window offset: %d, length: %d.%n", i, window.delta, window.length);
+		out.printf("%s rabu buffer length: %d, size: %d.%n", i, buffer.length,buffer.buffer.length);
+		out.printf("%s rabu i/o pointer internal: %d, external: %d.%n", i, window.internal(state), state.external);
 	    }
 	    out.println();
 
@@ -178,63 +178,18 @@ public final class Test {
 	     */
 	    if (null != this.raf){
 
-		if (this.raf.seek(0)){
-
-		    int av = this.raf.available();
-		    if (0x100 < av){
-
-			byte[] b = new byte[0x100];
-
-			int c = 0, r;
-			while (-1 < (r = this.raf.read(b,0,0x100))){
-
-			    c += r;
-
-			    super.print(b,0,r);
-
-			}
-			out.println();
-			if (c == av){
-			    out.printf("%s test print success [read %d/%d])%n",i,c,av);
-			    return true;
-			}
-			else {
-			    out.printf("%s test print failure [read %d/%d])%n",i,c,av);
-			    return false;
-			}
-		    }
-		    else if (0 < av){
-			byte[] b = new byte[av];
-
-			int r = this.raf.read(b,0,av);
-
-			super.print(b,0,r);
-
-			out.println();
-
-			if (av != r){
-
-			    out.printf("%s test print failure [read %d/%d]%n",i,r,av);
-			    return false;
-			}
-			else {
-
-			    out.printf("%s test print success [read %d]%n",i,av);
-			    return true;
-			}
-		    }
-		    else {
-			out.printf("%s test print [available 0] failed%n",i);
-			return false;
-		    }
+		if (this.raf.print(out)){
+		    out.println();
+		    out.printf("%s test print success.%n",i);
+		    return true;
 		}
 		else {
-		    out.printf("%s test print [seek 0] failed%n",i);
+		    out.printf("%s test print failure.%n",i);
 		    return false;
 		}
 	    }
 	    else {
-		out.printf("%s test print missing rabu%n",i);
+		out.printf("%s test print missing rabu.%n",i);
 		return false;
 	    }
 	}
@@ -252,8 +207,6 @@ public final class Test {
 
 		if (0 < this.read){
 
-		    super.reset();
-
 		    return true;
 		}
 	    }
@@ -262,16 +215,30 @@ public final class Test {
 	protected boolean window(Instruction i, int x, int c){
 	    raf = new RandomAccessFile(raf,new RandomAccessBuffer.Window(x,c));
 
-	    super.seek(x);
-
 	    return echo(i);
 	}
-	protected boolean copy(Instruction i, String arg){
+	protected boolean write(Instruction i, String arg){
 	    File file = new File(arg);
 
 	    this.file = file;
 
 	    this.wrote = raf.write(file);
+
+	    echo(i);
+
+	    return true;
+	}
+	protected boolean seek(Instruction i, int ofs){
+
+	    raf.seek(ofs);
+
+	    echo(i);
+
+	    return true;
+	}
+	protected boolean reset(Instruction i){
+
+	    raf.reset();
 
 	    echo(i);
 
@@ -319,12 +286,23 @@ public final class Test {
 		    int c = ((Integer)operands[1]).intValue();
 		    return s.window(this,o,c);
 		}
-	    case copy:
+	    case write:
 		{
 		    String o = (String)operands[0];
 
-		    return s.copy(this,o);
+		    return s.write(this,o);
 		}
+	    case seek:
+		{
+		    int o = ((Integer)operands[0]).intValue();
+
+		    return s.seek(this,o);
+		}
+	    case reset:
+		{
+		    return s.reset(this);
+		}
+
 	    default:
 		throw new IllegalStateException(this.operator.name());
 	    }

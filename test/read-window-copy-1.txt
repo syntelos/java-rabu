@@ -1,2 +1,0 @@
-read test/lorum-ipsum-753.txt window 100 100 copy /tmp/rabu-test_read-window-copy-1_100.txt
-0

@@ -20,7 +20,8 @@ package syntelos.rabu;
 import java.io.PrintStream;
 
 /**
- * Following the "octal dump" (unix "od") concept into {@link Test}.
+ * Following the "octal dump" (unix "od") concept into {@link Test}
+ * and {@link RandomAccessBuffer$Buffer}.
  */
 public class BufferPrinter {
     /**
@@ -187,26 +188,30 @@ public class BufferPrinter {
 
 
     public void reset(){
-	this.p = 0;
+
+	this.seek(0);
     }
     public void seek(int p){
+
 	this.p = p;
     }
-    public void print(byte[] b, int o, int l){
+    public void print(byte[] b, int i, int l){
 
-	this.print(b,o,l,System.out);
+	this.print(b,i,l,System.out);
     }
-    public void print(byte[] b, int o, int l, PrintStream out){
+    public void print(byte[] b, int i, int l, PrintStream out){
+
+	int z = (i+l);
 
 	int c = 0;
 
-	while (o < l){
+	while (i < z){
 
 	    out.printf("%07d",p);
 
-	    for (c = 0; c < 20 && o < l; c++,p++,o++){
+	    for (c = 0; c < 20 && i < z; c++,p++,i++){
 
-		byte bb = b[o];
+		byte bb = b[i];
 
 		switch(this.format){
 
