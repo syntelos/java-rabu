@@ -340,7 +340,7 @@ public class RandomAccessBuffer
 		    }
 		}
 	    }
-	    return true;
+	    return (0 == count);
 	}
 	protected int copy(Window w, State s, OutputStream out)
 	    throws IOException
