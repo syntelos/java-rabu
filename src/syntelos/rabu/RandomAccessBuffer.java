@@ -43,17 +43,17 @@ public class RandomAccessBuffer
      * internal = (window.delta + external)
      * </pre>
      */
-    protected static class Window
+    public static class Window
 	extends Object
     {
 	/**
 	 * Aperture floor as index (from zero) relative to buffer origin.
 	 */
-	protected int delta;
+	public int delta;
 	/**
 	 * Aperture ceiling as count from {@link #delta}.
 	 */
-	protected int length;
+	public int length;
 
 
 	Window(){
@@ -61,7 +61,7 @@ public class RandomAccessBuffer
 	    this.delta = 0;
 	    this.length = 0;
 	}
-	Window(int ofs, int len){
+	public Window(int ofs, int len){
 	    super();
 	    if (-1 < ofs && 0 < len){
 		this.delta = ofs;
@@ -73,13 +73,13 @@ public class RandomAccessBuffer
 	}
 
 
-	protected int internal(State s){
+	public int internal(State s){
 	    return (delta+s.external);
 	}
-	protected int internal(int external){
+	public int internal(int external){
 	    return (delta+external);
 	}
-	protected int available(State s){
+	public int available(State s){
 
 	    if (0 < length){
 
@@ -108,17 +108,17 @@ public class RandomAccessBuffer
      * This interface employs an externalized coordinate space to
      * implement a window / aperture constraint.
      */
-    protected static class Buffer
+    public static class Buffer
 	extends BufferPrinter
     {
 	/**
 	 * Occasionally optimistic
 	 */
-	protected byte[] buffer;
+	public byte[] buffer;
 	/**
 	 * Readable content
 	 */
-	protected int length;
+	public int length;
 
 
 	Buffer(){
@@ -138,7 +138,7 @@ public class RandomAccessBuffer
 	}
 
 
-	protected void grow(int q){
+	public void grow(int q){
 
 	    if (0 < q){
 
@@ -152,15 +152,15 @@ public class RandomAccessBuffer
 		throw new IllegalArgumentException();
 	    }
 	}
-	protected int internal(Window w, State s){
+	public int internal(Window w, State s){
 
 	    return w.internal(s);
 	}
-	protected int internal(Window w, State s, int external){
+	public int internal(Window w, State s, int external){
 
 	    return w.internal(external);
 	}
-	protected int available(Window w, State s){
+	public int available(Window w, State s){
 	    int i = w.internal(s);
 	    int q = w.available(s);
 	    if (-1 < q){
@@ -186,7 +186,7 @@ public class RandomAccessBuffer
 	/**
 	 * Read from buffer with effect to {@link State}.
 	 */
-	protected int read(Window w, State s){
+	public int read(Window w, State s){
 
 	    int i = this.internal(w,s);
 	    int q = this.available(w,s);
@@ -195,13 +195,13 @@ public class RandomAccessBuffer
 
 		s.external += 1;
 
-		return this.buffer[i];
+		return (this.buffer[i] & 0xFF);
 	    }
 	    else {
 		return -1;
 	    }
 	}
-	protected int read(Window w, State s, byte[] b, int o, int l){
+	public int read(Window w, State s, byte[] b, int o, int l){
 
 	    int i = this.internal(w,s);
 	    int q = Math.min(l,this.available(w,s));
@@ -221,11 +221,11 @@ public class RandomAccessBuffer
 	/**
 	 * No effect to {@link State}
 	 */
-	protected boolean print(Window w, State s){
+	public boolean print(Window w, State s){
 
 	    return this.print(w,s,System.out);
 	}
-	protected boolean print(Window w, State s, PrintStream out){
+	public boolean print(Window w, State s, PrintStream out){
 
 	    int i = this.internal(w,s);
 	    int q = this.available(w,s);
@@ -240,14 +240,14 @@ public class RandomAccessBuffer
 		return false;
 	    }
 	}
-	protected boolean reset(Window w, State s){
+	public boolean reset(Window w, State s){
 
 	    return this.seek(w,s,0);
 	}
 	/**
 	 * Change {@link State}
 	 */
-	protected boolean seek(Window w, State s, int external){
+	public boolean seek(Window w, State s, int external){
 
 	    int i = this.internal(w,s,external);
 
@@ -266,7 +266,7 @@ public class RandomAccessBuffer
 	/**
 	 * Write to buffer with effect to {@link State}
 	 */
-	protected boolean write(Window w, State s, int b){
+	public boolean write(Window w, State s, int b){
 	    /*
 	     * [TODO]    Constrain WRITE by WINDOW
 	     */
@@ -294,7 +294,7 @@ public class RandomAccessBuffer
 		return false;
 	    }
 	}
-	protected boolean write(Window w, State s, byte[] b, int o, int l){
+	public boolean write(Window w, State s, byte[] b, int o, int l){
 	    /*
 	     * [TODO]    Constrain WRITE by WINDOW
 	     */
@@ -321,7 +321,7 @@ public class RandomAccessBuffer
 		return false;
 	    }
 	}
-	protected boolean copy(Window w, State s, InputStream in, int count)
+	public boolean copy(Window w, State s, InputStream in, int count)
 	    throws IOException
 	{
 	    int z = floor(count);
@@ -342,7 +342,7 @@ public class RandomAccessBuffer
 	    }
 	    return (0 == count);
 	}
-	protected int copy(Window w, State s, OutputStream out)
+	public int copy(Window w, State s, OutputStream out)
 	    throws IOException
 	{
 	    int z = floor(this.available(w,s));
@@ -358,27 +358,43 @@ public class RandomAccessBuffer
 	    }
 	    return c;
 	}
-	protected int get(Window w, State s, int x){
+	public byte[] copy(Window w, State s, int x, int q)
+	{
+	    if (q <= this.available(w,s)){
+
+		int i = this.internal(w,s,x);
+
+		byte[] b = new byte[q];
+		{
+		    System.arraycopy(this.buffer,i,b,0,q);
+		}
+		return b;
+	    }
+	    else {
+		return null;
+	    }
+	}
+	public int get(Window w, State s, int x){
 
 	    int i = this.internal(w,s,x);
 	    int q = this.available(w,s);
 
 	    if (0 < q && -1 < i){
 
-		return this.buffer[i];
+		return (this.buffer[i] & 0xFF);
 	    }
 	    else {
 		throw new IllegalArgumentException(String.valueOf(x));
 	    }
 	}
-	protected boolean set(Window w, State s, int x, int v){
+	public boolean set(Window w, State s, int x, int v){
 
 	    int i = this.internal(w,s,x);
 	    int q = this.available(w,s);
 
 	    if (0 < q && -1 < i){
 
-		this.buffer[i] = (byte)(v & 0xff);
+		this.buffer[i] = (byte)(v & 0xFF);
 
 		return true;
 	    }
@@ -386,7 +402,7 @@ public class RandomAccessBuffer
 		throw new IllegalArgumentException(String.valueOf(x));
 	    }
 	}
-	protected int indexOf(Window w, State s, int c){
+	public int indexOf(Window w, State s, int c){
 
 	    int x = s.external;
 	    int i = this.internal(w,s);
@@ -407,7 +423,7 @@ public class RandomAccessBuffer
 	    }
 	    return -1;
 	}
-	protected String substring(Window w, State s, int o, int l){
+	public String substring(Window w, State s, int o, int l){
 
 	    int i = this.internal(w,s,o);
 	    int q = Math.min(l,this.available(w,s));
@@ -421,7 +437,7 @@ public class RandomAccessBuffer
 	    }
 	}
 
-	protected final static int ceil(int q){
+	public final static int ceil(int q){
 	    if (0x100 > q)
 		return 0x100;
 	    else {
@@ -430,7 +446,7 @@ public class RandomAccessBuffer
 		return q;
 	    }
 	}
-	protected final static int floor(int q){
+	public final static int floor(int q){
 	    if (0x100 > q)
 		return q;
 	    else if (0x200 < q)
@@ -442,10 +458,10 @@ public class RandomAccessBuffer
     /**
      * External offset
      */
-    protected static class State
+    public static class State
 	extends Object
     {
-	protected int external = 0;
+	public int external = 0;
     }
 
 
@@ -550,6 +566,14 @@ public class RandomAccessBuffer
 	throws IOException
     {
 	return this.buffer.copy(this.window,this.state,out);
+    }
+    /**
+     * Read from buffer without incrementing the user I/O pointer
+     * ({@link State}).
+     */
+    public byte[] copy(int x, int q)
+    {
+	return this.buffer.copy(this.window,this.state,x,q);
     }
     /**
      * Copy buffer to (standard) output using I/O pointer {@link

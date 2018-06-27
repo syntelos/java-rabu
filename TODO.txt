@@ -3,4 +3,4 @@
 * [RABU] Constrain WRITE by WINDOW
 * [RABU] Constrain WRITE by BUFFER
 * [TEST] (coverage)
-
+* [RADA] Review signed bit I/O
