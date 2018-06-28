@@ -28,7 +28,7 @@ import java.io.EOFException;
  * for multi-byte word ordering.
  */
 public class RandomAccessData
-    extends RandomAccessBuffer
+    extends RandomAccessFile
 {
     /**
      * Byte order in word data I/O.
@@ -87,6 +87,9 @@ public class RandomAccessData
     public final Endian endian;
 
 
+    public RandomAccessData(){
+	this(Endian.BE);
+    }
     public RandomAccessData(Endian e){
 	super();
 	if (null != e){
@@ -95,6 +98,9 @@ public class RandomAccessData
 	else {
 	    throw new IllegalArgumentException();
 	}
+    }
+    public RandomAccessData(byte[] b, int x, int l){
+	this(Endian.BE,b,x,l);
     }
     public RandomAccessData(Endian e, byte[] b, int x, int l){
 	super(b,x,l);
@@ -105,6 +111,9 @@ public class RandomAccessData
 	    throw new IllegalArgumentException();
 	}
     }
+    public RandomAccessData(RandomAccessBuffer r){
+	this(Endian.BE,r);
+    }
     public RandomAccessData(Endian e, RandomAccessBuffer r){
 	super(r);
 	if (null != e){
@@ -113,6 +122,9 @@ public class RandomAccessData
 	else {
 	    throw new IllegalArgumentException();
 	}
+    }
+    public RandomAccessData(RandomAccessBuffer r, Window w){
+	this(Endian.BE,r,w);
     }
     public RandomAccessData(Endian e, RandomAccessBuffer r, Window w){
 	super(r,w);

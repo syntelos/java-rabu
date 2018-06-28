@@ -132,122 +132,6 @@ public final class Test {
     /**
      * 
      */
-    public static class State {
-
-	public RandomAccessFile raf;
-
-	public File file;
-
-	public int read = 0, wrote = 0;
-
-
-	public State(){
-	    super();
-	}
-
-
-	protected boolean echo(Instruction i){
-	    out.println(i);
-	    /*
-	     */
-	    if (null != this.file)
-
-		out.printf("%s test file: %s, read: %d, wrote: %d.%n", i, this.file.getPath(), this.read, this.wrote);
-	    else
-		out.printf("%s test read: %d, wrote: %d.%n", i, this.read, this.wrote);
-	    /*
-	     */
-	    if (null != raf){
-
-		RandomAccessBuffer.Window window = raf.window;
-
-		RandomAccessBuffer.Buffer buffer = raf.buffer;
-
-		RandomAccessBuffer.State state = raf.state;
-
-		out.printf("%s rabu window offset: %d, length: %d.%n", i, window.delta, window.length);
-		out.printf("%s rabu buffer length: %d, size: %d.%n", i, buffer.length,buffer.buffer.length);
-		out.printf("%s rabu i/o pointer internal: %d, external: %d.%n", i, window.internal(state), state.external);
-	    }
-	    out.println();
-
-	    return true;
-	}
-	protected boolean print(Instruction i){
-	    /*
-	     */
-	    if (null != this.raf){
-
-		if (this.raf.print(out)){
-		    out.println();
-		    out.printf("%s test print success.%n",i);
-		    return true;
-		}
-		else {
-		    out.printf("%s test print failure.%n",i);
-		    return false;
-		}
-	    }
-	    else {
-		out.printf("%s test print missing rabu.%n",i);
-		return false;
-	    }
-	}
-	protected boolean read(Instruction i, String arg){
-	    File file = new File(arg);
-	    if (file.isFile() && file.canRead()){
-
-		this.file = file;
-
-		raf = new RandomAccessFile();
-
-		this.read = raf.read(file);
-
-		echo(i);
-
-		if (0 < this.read){
-
-		    return true;
-		}
-	    }
-	    return false;
-	}
-	protected boolean window(Instruction i, int x, int c){
-	    raf = new RandomAccessFile(raf,new RandomAccessBuffer.Window(x,c));
-
-	    return echo(i);
-	}
-	protected boolean write(Instruction i, String arg){
-	    File file = new File(arg);
-
-	    this.file = file;
-
-	    this.wrote = raf.write(file);
-
-	    echo(i);
-
-	    return true;
-	}
-	protected boolean seek(Instruction i, int ofs){
-
-	    raf.seek(ofs);
-
-	    echo(i);
-
-	    return true;
-	}
-	protected boolean reset(Instruction i){
-
-	    raf.reset();
-
-	    echo(i);
-
-	    return true;
-	}
-    }
-    /**
-     * 
-     */
     public static class Instruction {
 
 	public final Operator operator;
@@ -264,7 +148,7 @@ public final class Test {
 	}
 
 
-	public boolean proc(State s){
+	public boolean proc(Test s){
 	    switch(operator){
 	    case echo:
 		{
@@ -337,7 +221,7 @@ public final class Test {
 	if (0 < argl){
 	    int argc = 0;
 	    String arg = null;
-	    State state = new State();
+	    Test test = new Test();
 	    try {
 		while (argc < argl){
 		    arg = argv[argc++];
@@ -349,7 +233,7 @@ public final class Test {
 		    }
 		    Instruction i = new Instruction(c,o);
 
-		    if (! i.proc(state)){
+		    if (! i.proc(test)){
 
 			System.exit(1);
 		    }
@@ -369,5 +253,117 @@ public final class Test {
 	else {
 	    usage();
 	}
+    }
+
+
+    public RandomAccessData rada;
+
+    public File file;
+
+    public int read = 0, wrote = 0;
+
+
+    public Test(){
+	super();
+    }
+
+
+    protected boolean echo(Instruction i){
+	out.println(i);
+	/*
+	 */
+	if (null != this.file)
+
+	    out.printf("%s test file: %s, read: %d, wrote: %d.%n", i, this.file.getPath(), this.read, this.wrote);
+	else
+	    out.printf("%s test read: %d, wrote: %d.%n", i, this.read, this.wrote);
+	/*
+	 */
+	if (null != rada){
+
+	    Window window = rada.window;
+
+	    Buffer buffer = rada.buffer;
+
+	    State state = rada.state;
+
+	    out.printf("%s rabu window offset: %d, length: %d.%n", i, window.delta, window.length);
+	    out.printf("%s rabu buffer length: %d, size: %d.%n", i, buffer.length,buffer.buffer.length);
+	    out.printf("%s rabu i/o pointer internal: %d, external: %d.%n", i, window.internal(state), state.external);
+	}
+	out.println();
+
+	return true;
+    }
+    protected boolean print(Instruction i){
+	/*
+	 */
+	if (null != this.rada){
+
+	    if (this.rada.print(out)){
+		out.println();
+		out.printf("%s test print success.%n",i);
+		return true;
+	    }
+	    else {
+		out.printf("%s test print failure.%n",i);
+		return false;
+	    }
+	}
+	else {
+	    out.printf("%s test print missing rabu.%n",i);
+	    return false;
+	}
+    }
+    protected boolean read(Instruction i, String arg){
+	File file = new File(arg);
+	if (file.isFile() && file.canRead()){
+
+	    this.file = file;
+
+	    rada = new RandomAccessData();
+
+	    this.read = rada.read(file);
+
+	    echo(i);
+
+	    if (0 < this.read){
+
+		return true;
+	    }
+	}
+	return false;
+    }
+    protected boolean window(Instruction i, int x, int c){
+	rada = new RandomAccessData(rada,new Window(x,c));
+
+	return echo(i);
+    }
+    protected boolean write(Instruction i, String arg){
+	File file = new File(arg);
+
+	this.file = file;
+
+	this.wrote = rada.write(file);
+
+	echo(i);
+
+	return true;
+    }
+    protected boolean seek(Instruction i, int ofs){
+
+	rada.seek(ofs);
+
+	echo(i);
+
+	return true;
+    }
+    protected boolean reset(Instruction i){
+
+	rada.reset();
+
+	echo(i);
+
+	return true;
     }
 }
