@@ -30,56 +30,6 @@ import java.io.EOFException;
 public class RandomAccessData
     extends RandomAccessFile
 {
-    /**
-     * Byte order in word data I/O.
-     */
-    public static enum Endian {
-	/**
-	 * Least significant byte, first.
-	 */
-	LE,
-	/**
-	 * Most significant byte, first.
-	 */
-	BE;
-
-
-	public int uint16(byte[] m, int o){
-
-	    int a = (m[o] & 0xFF);
-	    int b = (m[o+1] & 0xFF);
-
-	    switch(this){
-	    case LE:
-		return (((b & 0xFF) << 8)|(a & 0xFF));
-
-	    case BE:
-		return (((a & 0xFF) << 8)|(b & 0xFF));
-
-	    default:
-		throw new InternalError(this.name());
-	    }
-	}
-	public int sint32(byte[] m, int o){
-
-	    int a = (m[o] & 0xFF);
-	    int b = (m[o+1] & 0xFF);
-	    int c = (m[o+2] & 0xFF);
-	    int d = (m[o+3] & 0xFF);
-
-	    switch(this){
-	    case LE:
-		return (((d & 0xFF) << 24)|((c & 0xFF) << 16)|((b & 0xFF) << 8)|(a & 0xFF));
-
-	    case BE:
-		return (((a & 0xFF) << 24)|((b & 0xFF) << 16)|((c & 0xFF) << 8)|(d & 0xFF));
-
-	    default:
-		throw new InternalError(this.name());
-	    }
-	}
-
-    }
 
     /**
      * Multi-byte word ordering employed by this class.
