@@ -60,6 +60,13 @@ public class Buffer
     }
 
 
+    /**
+     * @param q Rate of growth may be aligned to a typical page using
+     * {@link #floor(int)} and {@link #ceil(int)}.
+     * 
+     * @see #floor(int)
+     * @see #ceil(int)
+     */
     public void grow(int q){
 
 	if (0 >= q){

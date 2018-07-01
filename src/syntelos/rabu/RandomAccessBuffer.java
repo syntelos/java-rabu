@@ -83,7 +83,8 @@ public class RandomAccessBuffer
      * An optimistic approach to capacity will call this method once
      * before using the buffer.
      * 
-     * @param cap Buffer capacity figure
+     * @param cap Buffer capacity figure to be trimmed to a page
+     * boundary using {@link Buffer#ceil(int) ceil}.
      */
     public void optimism(int cap){
 
@@ -93,7 +94,8 @@ public class RandomAccessBuffer
      * A pessimistic approach to buffer capacity will call this method
      * periodically while using the buffer.
      * 
-     * @param cap Buffer capacity figure
+     * @param cap Buffer capacity figure to be trimmed to a page
+     * boundary using {@link Buffer#floor(int) floor}.
      */
     public void pessimism(int cap){
 
