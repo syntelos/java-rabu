@@ -80,6 +80,26 @@ public class RandomAccessBuffer
 	return this.buffer.available(this.window,this.state);
     }
     /**
+     * An optimistic approach to capacity will call this method once
+     * before using the buffer.
+     * 
+     * @param cap Buffer capacity figure
+     */
+    public void optimism(int cap){
+
+	this.buffer.grow(Buffer.ceil(cap));
+    }
+    /**
+     * A pessimistic approach to buffer capacity will call this method
+     * periodically while using the buffer.
+     * 
+     * @param cap Buffer capacity figure
+     */
+    public void pessimism(int cap){
+
+	this.buffer.grow(Buffer.floor(cap));
+    }
+    /**
      * Set user I/O pointer {@link State} to zero (origin).
      */
     public boolean reset(){

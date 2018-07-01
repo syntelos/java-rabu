@@ -37,6 +37,10 @@ public class Buffer
      * Readable content
      */
     public int length;
+    /**
+     * Default rate of growth 
+     */
+    private int growth = 0x100;
 
 
     protected Buffer(){
@@ -58,17 +62,20 @@ public class Buffer
 
     public void grow(int q){
 
-	if (0 < q){
+	if (0 >= q){
 
-	    byte[] grow = new byte[this.buffer.length + q];
-
-	    System.arraycopy(this.buffer,0,grow,0,this.buffer.length);
-
-	    this.buffer = grow;
+	    q = this.growth;
 	}
 	else {
-	    throw new IllegalArgumentException();
+
+	    this.growth = q;
 	}
+
+	byte[] grow = new byte[this.buffer.length + q];
+
+	System.arraycopy(this.buffer,0,grow,0,this.buffer.length);
+
+	this.buffer = grow;
     }
     public int internal(Window w, State s){
 
@@ -212,7 +219,7 @@ public class Buffer
 
 		if ((i+1) > this.buffer.length){
 
-		    this.grow(0x100);
+		    this.grow(-1);
 		}
 
 		this.length += 1;
@@ -369,7 +376,9 @@ public class Buffer
 	    throw new IllegalArgumentException(String.format("offset: %d, length: %d",o,l));
 	}
     }
-
+    /**
+     * Optimistic rate of growth filter
+     */
     public final static int ceil(int q){
 	if (0x100 > q)
 	    return 0x100;
@@ -379,6 +388,9 @@ public class Buffer
 	    return q;
 	}
     }
+    /**
+     * Pessimistic rate of growth filter
+     */
     public final static int floor(int q){
 	if (0x100 > q)
 	    return q;
