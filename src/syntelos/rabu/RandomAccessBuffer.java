@@ -196,14 +196,15 @@ public class RandomAccessBuffer
 	    throw new InternalError();
     }
     /**
-     * Same as {@link #available()}.
+     * Readable size of buffer, independent of user I/O pointer {@link
+     * State}.
      * 
      * @see #get(int)
      * @see #set(int,int)
      */
     public int length(){
 
-	return this.buffer.available(this.window,this.state);
+	return this.buffer.length;
     }
     /**
      * Random access constrainted by window and read.
