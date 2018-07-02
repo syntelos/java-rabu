@@ -300,15 +300,11 @@ public final class Test {
 	 */
 	if (null != this.rada){
 
-	    if (this.rada.print(out)){
-		out.println();
-		out.printf("%s test print success.%n",i);
-		return true;
-	    }
-	    else {
-		out.printf("%s test print failure.%n",i);
-		return false;
-	    }
+	    this.rada.print(out);
+
+	    out.printf("%s %n",i);
+
+	    return true;
 	}
 	else {
 	    out.printf("%s test print missing rabu.%n",i);

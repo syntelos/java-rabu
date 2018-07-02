@@ -176,18 +176,24 @@ public class RandomAccessBuffer
      * State} with external offsets.  This operation has no effect on
      * the read state.
      */
-    public boolean print(){
+    public void print(){
 
-	return this.buffer.print(this.window,this.state);
+	if (this.buffer.print(this.window,this.state))
+	    return;
+	else 
+	    throw new InternalError();
     }
     /**
      * Copy buffer to (argument) output using I/O pointer {@link
      * State} with external offsets.  This operation has no effect on
      * the read state.
      */
-    public boolean print(PrintStream out){
+    public void print(PrintStream out){
 
-	return this.buffer.print(this.window,this.state,out);
+	if (this.buffer.print(this.window,this.state,out))
+	    return;
+	else
+	    throw new InternalError();
     }
     /**
      * Same as {@link #available()}.
