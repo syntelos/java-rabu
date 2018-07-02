@@ -68,14 +68,14 @@ public class RandomAccessBuffer
     /**
      * @return User I/O pointer (buffer offset)
      */
-    public int offset(){
+    public final int offset(){
 
 	return this.state.external;
     }
     /**
      * Same as {@link #length()}
      */
-    public int available(){
+    public final int available(){
 
 	return this.buffer.available(this.window,this.state);
     }
@@ -86,7 +86,7 @@ public class RandomAccessBuffer
      * @param cap Buffer capacity figure to be trimmed to a page
      * boundary using {@link Buffer#ceil(int) ceil}.
      */
-    public void optimism(int cap){
+    public final void optimism(int cap){
 
 	this.buffer.grow(Buffer.ceil(cap));
     }
@@ -97,21 +97,21 @@ public class RandomAccessBuffer
      * @param cap Buffer capacity figure to be trimmed to a page
      * boundary using {@link Buffer#floor(int) floor}.
      */
-    public void pessimism(int cap){
+    public final void pessimism(int cap){
 
 	this.buffer.grow(Buffer.floor(cap));
     }
     /**
      * Set user I/O pointer {@link State} to zero (origin).
      */
-    public boolean reset(){
+    public final boolean reset(){
 
 	return this.buffer.reset(this.window,this.state);
     }
     /**
      * @param external User I/O pointer (buffer offset)
      */
-    public boolean seek(int external){
+    public final boolean seek(int external){
 
 	return this.buffer.seek(this.window,this.state,external);
     }
@@ -119,11 +119,11 @@ public class RandomAccessBuffer
      * Employ {@link Window} and {@link State} to return a byte from
      * the {@link Buffer}, incrementing the user I/O pointer.
      */
-    public int read(){
+    public final int read(){
 
 	return this.buffer.read(this.window,this.state);
     }
-    public int read(byte[] b, int o, int l){
+    public final int read(byte[] b, int o, int l){
 
 	if (null != b && -1 < o && o < l){
 
@@ -137,11 +137,11 @@ public class RandomAccessBuffer
      * Employ {@link Window} and {@link State} to write a byte to the
      * {@link Buffer}, incrementing the user I/O pointer.
      */
-    public boolean write(int b){
+    public final boolean write(int b){
 
 	return this.buffer.write(this.window,this.state,b);
     }
-    public boolean write(byte[] b, int o, int l){
+    public final boolean write(byte[] b, int o, int l){
 
 	return this.buffer.write(this.window,this.state,b,o,l);
     }
@@ -149,7 +149,7 @@ public class RandomAccessBuffer
      * Write to buffer without incrementing the user I/O pointer
      * ({@link State}).
      */
-    public boolean copy(InputStream in, int count)
+    public final boolean copy(InputStream in, int count)
 	throws IOException
     {
 	return this.buffer.copy(this.window,this.state,in,count);
@@ -158,7 +158,7 @@ public class RandomAccessBuffer
      * Read from buffer without incrementing the user I/O pointer
      * ({@link State}).
      */
-    public int copy(OutputStream out)
+    public final int copy(OutputStream out)
 	throws IOException
     {
 	return this.buffer.copy(this.window,this.state,out);
@@ -167,7 +167,7 @@ public class RandomAccessBuffer
      * Read from buffer without incrementing the user I/O pointer
      * ({@link State}).
      */
-    public byte[] copy(int x, int q)
+    public final byte[] copy(int x, int q)
     {
 	return this.buffer.copy(this.window,this.state,x,q);
     }
@@ -202,7 +202,7 @@ public class RandomAccessBuffer
      * @see #get(int)
      * @see #set(int,int)
      */
-    public int length(){
+    public final int length(){
 
 	return this.buffer.length;
     }
@@ -212,7 +212,7 @@ public class RandomAccessBuffer
      * @see #length()
      * @see #set(int,int)
      */
-    public int get(int x){
+    public final int get(int x){
 
 	return this.buffer.get(this.window,this.state,x);
     }
@@ -222,21 +222,21 @@ public class RandomAccessBuffer
      * @see #length()
      * @see #get(int)
      */
-    public boolean set(int x, int v){
+    public final boolean set(int x, int v){
 
 	return this.buffer.set(this.window,this.state,x,v);
     }
     /**
      * 
      */
-    public int indexOf(int c){
+    public final int indexOf(int c){
 
 	return this.buffer.indexOf(this.window,this.state,c);
     }
     /**
      * 
      */
-    public String substring(int o, int l){
+    public final String substring(int o, int l){
 
 	return this.buffer.substring(this.window,this.state,o,l);
     }
