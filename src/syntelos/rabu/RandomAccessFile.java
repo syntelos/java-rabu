@@ -31,11 +31,13 @@ public class RandomAccessFile
 {
 
 
-    public RandomAccessFile(){
-	super();
+    public RandomAccessFile(Printer.Configuration c){
+	super(c);
     }
-    public RandomAccessFile(byte[] b, int x, int l){
-	super(b,x,l);
+    public RandomAccessFile(Printer.Configuration c,
+			    byte[] b, int x, int l)
+    {
+	super(c,b,x,l);
     }
     public RandomAccessFile(RandomAccessBuffer r){
 	super(r);

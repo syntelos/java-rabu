@@ -43,14 +43,16 @@ public class RandomAccessBuffer
     protected final State state = new State();
 
 
-    public RandomAccessBuffer(){
+    public RandomAccessBuffer(Printer.Configuration c){
 	super();
-	this.buffer = new Buffer();
+	this.buffer = new Buffer(c);
 	this.window = new Window();
     }
-    public RandomAccessBuffer(byte[] b, int external, int len){
+    public RandomAccessBuffer(Printer.Configuration c, 
+			      byte[] b, int external, int len)
+    {
 	super();
-	this.buffer = new Buffer(b);
+	this.buffer = new Buffer(c,b);
 	this.window = new Window(external,len);
     }
     public RandomAccessBuffer(RandomAccessBuffer r){
@@ -58,7 +60,8 @@ public class RandomAccessBuffer
 	this.buffer = r.buffer;
 	this.window = r.window;
     }
-    public RandomAccessBuffer(RandomAccessBuffer r, Window w){
+    public RandomAccessBuffer(RandomAccessBuffer r, Window w)
+    {
 	super();
 	this.buffer = r.buffer;
 	this.window = w;

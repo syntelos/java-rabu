@@ -37,11 +37,11 @@ public class RandomAccessData
     public final Endian endian;
 
 
-    public RandomAccessData(){
-	this(Endian.BE);
+    public RandomAccessData(Printer.Configuration c){
+	this(c,Endian.BE);
     }
-    public RandomAccessData(Endian e){
-	super();
+    public RandomAccessData(Printer.Configuration c, Endian e){
+	super(c);
 	if (null != e){
 	    this.endian = e;
 	}
@@ -49,11 +49,14 @@ public class RandomAccessData
 	    throw new IllegalArgumentException();
 	}
     }
-    public RandomAccessData(byte[] b, int x, int l){
-	this(Endian.BE,b,x,l);
+    public RandomAccessData(Printer.Configuration c,
+			    byte[] b, int x, int l){
+	this(c,Endian.BE,b,x,l);
     }
-    public RandomAccessData(Endian e, byte[] b, int x, int l){
-	super(b,x,l);
+    public RandomAccessData(Printer.Configuration c,
+			    Endian e, byte[] b, int x, int l)
+    {
+	super(c,b,x,l);
 	if (null != e){
 	    this.endian = e;
 	}
@@ -76,7 +79,8 @@ public class RandomAccessData
     public RandomAccessData(RandomAccessBuffer r, Window w){
 	this(Endian.BE,r,w);
     }
-    public RandomAccessData(Endian e, RandomAccessBuffer r, Window w){
+    public RandomAccessData(Endian e, RandomAccessBuffer r, Window w)
+    {
 	super(r,w);
 	if (null != e){
 	    this.endian = e;

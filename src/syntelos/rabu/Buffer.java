@@ -27,7 +27,7 @@ import java.io.PrintStream;
  * implement a window / aperture constraint.
  */
 public class Buffer
-    extends BufferPrinter
+    extends Printer
 {
     /**
      * Occasionally optimistic
@@ -43,13 +43,13 @@ public class Buffer
     private int growth = 0x100;
 
 
-    protected Buffer(){
-	super();
+    protected Buffer(Printer.Configuration c){
+	super(c);
 	this.buffer = new byte[0x100];
 	this.length = 0;
     }
-    protected Buffer(byte[] b){
-	super();
+    protected Buffer(Printer.Configuration c, byte[] b){
+	super(c);
 	if (null != b && 0 < b.length){
 	    this.buffer = b;
 	    this.length = b.length;

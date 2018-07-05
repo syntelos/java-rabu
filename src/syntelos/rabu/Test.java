@@ -61,6 +61,7 @@ public final class Test {
      */
     public static enum Operator {
 	echo   ("","Print state."),
+	format ("<location> <content>","Formatting configuration (dec|hex) (asc|hex).",Operand.STR,Operand.STR),
 	print  ("","Read from buffer."),
 	read   ("<file>","Write to buffer.",Operand.STR),
 	window ("<offset> <count>","Constrain buffer to window.",Operand.INT,Operand.INT),
@@ -99,7 +100,7 @@ public final class Test {
 			    re[cc] = arg;
 			    break;
 			case INT:
-			    re[cc] = new Integer(arg);
+			    re[cc] = Integer.decode(arg);
 			    break;
 			default:
 			    throw new IllegalStateException();
@@ -153,6 +154,13 @@ public final class Test {
 	    case echo:
 		{
 		    return s.echo(this);
+		}
+	    case format:
+		{
+		    String o = (String)operands[0];
+		    String c = (String)operands[1];
+
+		    return s.format(this,o,c);
 		}
 	    case print:
 		{
@@ -256,6 +264,8 @@ public final class Test {
     }
 
 
+    public Printer.Configuration pc = new Printer.Configuration();
+
     public RandomAccessData rada;
 
     public File file;
@@ -311,13 +321,30 @@ public final class Test {
 	    return false;
 	}
     }
+    protected boolean format(Instruction i, String o, String c){
+	try {
+	    this.pc = new Printer.Configuration(o,c);
+
+	    out.printf("%s (%s) %n",i,this.pc);
+
+	    return true;
+	}
+	catch (RuntimeException exc){
+
+	    exc.printStackTrace();
+
+	    out.printf("%s (%s) %n",i,exc);
+
+	    return false;
+	}
+    }
     protected boolean read(Instruction i, String arg){
 	File file = new File(arg);
 	if (file.isFile() && file.canRead()){
 
 	    this.file = file;
 
-	    rada = new RandomAccessData();
+	    rada = new RandomAccessData(pc);
 
 	    this.read = rada.read(file);
 

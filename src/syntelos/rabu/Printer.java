@@ -23,7 +23,7 @@ import java.io.PrintStream;
  * Following the "octal dump" (unix "od") concept into {@link Test}
  * and {@link RandomAccessBuffer$Buffer}.
  */
-public class BufferPrinter {
+public class Printer {
     /**
      * An ASCII named character table.
      */
@@ -113,80 +113,164 @@ public class BufferPrinter {
 	}
     }
     /**
-     * Work in progress
+     * 
      */
-    public static enum Format {
-	ASC  (Format.Operand.NONE),
-	HEX  (Format.Operand.SIZE);
+    public static enum Offset
+    {
+	DEC,
+	HEX;
+
+	public final static Offset Default = HEX;
+    }
+    /**
+     * 
+     */
+    public static enum Content
+    {
+	ASC,
+	HEX;
+
+	public final static Content Default = ASC;
+    }
+    /**
+     * 
+     */
+    public static class Configuration {
+
+	public final Offset offset;
+
+	public final Content content;
 
 
-	/**
-	 * Work in progress
-	 */
-	public static enum Operand {
-	    NONE (-1),
-	    SIZE (0);
+	public Configuration(){
+	    super();
 
-	    public final int floor;
+	    this.offset = Offset.Default;
+	    this.content = Content.Default;
+	}
+	public Configuration(Offset o, Content c){
+	    super();
 
-	    Operand(int floor){
-		this.floor = floor;
+	    if (null != o){
+
+		this.offset = o;
+	    }
+	    else {
+		this.offset = Offset.Default;
 	    }
 
-	    public boolean accept(int value){
-		return (floor < value);
+	    if (null != c){
+
+		this.content = c;
 	    }
-	    public boolean is(Operand opnd){
-		return (this == opnd);
+	    else {
+		this.content = Content.Default;
+	    }
+	}
+	public Configuration(String so, String sc){
+	    super();
+
+	    if (null != so){
+		this.offset = Offset.valueOf(so.toUpperCase());
+	    }
+	    else {
+		this.offset = Offset.Default;
+	    }
+
+	    if (null != sc){
+		this.content = Content.valueOf(so.toUpperCase());
+	    }
+	    else {
+		this.content = Content.Default;
 	    }
 	}
 
+	public String toString(){
 
-	public final Operand operand;
-
-	Format(Operand operand){
-	    this.operand = operand;
+	    return ("offset: "+this.offset+", content: "+this.content);
 	}
     }
 
 
+    public final Offset offset;
 
-    public final Format format;
-
-    public final int size;
+    public final Content content;
 
     private int p = 0;
 
 
-    public BufferPrinter(){
-	this(Format.ASC);
-    }
-    public BufferPrinter(Format f){
+    public Printer(Offset o, Content c){
 	super();
-	if (null != f && Format.Operand.NONE.is(f.operand)){
 
-	    this.format = f;
+	if (null != o){
 
-	    this.size = Format.Operand.NONE.floor;
+	    this.offset = o;
 	}
 	else {
-	    throw new IllegalArgumentException();
+	    this.offset = Offset.DEC;
 	}
-    }
-    public BufferPrinter(Format f, int size){
-	super();
-	if (null != f && Format.Operand.SIZE.is(f.operand) && Format.Operand.SIZE.accept(size)){
 
-	    this.format = f;
+	if (null != c){
 
-	    this.size = size;
+	    this.content = c;
 	}
 	else {
-	    throw new IllegalArgumentException();
+	    this.content = Content.ASC;
+	}
+    }
+    public Printer(Configuration c){
+	super();
+
+	if (null != c){
+	    this.offset = c.offset;
+	    this.content = c.content;
+	}
+	else {
+	    this.offset = Offset.Default;
+	    this.content = Content.Default;
 	}
     }
 
 
+    protected void offset(PrintStream out){
+	switch(this.offset){
+	case DEC:
+	    out.printf("%07d",p);
+	    break;
+	case HEX:
+	    out.printf("%08X",p);
+	    break;
+	default:
+	    throw new InternalError(this.offset.name());
+	}
+    }
+    protected void content(int ch, PrintStream out){
+	switch(this.content){
+
+	case ASC:
+	    ASCII as = ASCII.valueOf(ch);
+	    if (null != as){
+
+		out.printf(" %3s",as.name());
+	    }
+	    else if (0x20 < ch && 0x7F > ch){
+
+		out.printf(" %3c",ch);
+	    }
+	    else {
+
+		out.printf(" %03X",ch);
+	    }
+	    break;
+
+	case HEX:
+	    out.printf(" %02X",ch);
+	    break;
+
+	default:
+	    throw new InternalError(this.content.name());
+	}
+    }
     public void reset(){
 
 	this.seek(0);
@@ -207,42 +291,40 @@ public class BufferPrinter {
 
 	while (i < z){
 
-	    out.printf("%07d",p);
+	    offset(out);
 
 	    for (c = 0; c < 20 && i < z; c++,p++,i++){
 
-		byte bb = b[i];
-
-		switch(this.format){
-
-		case ASC:
-		    ASCII as = ASCII.valueOf(bb);
-		    if (null != as){
-
-			out.printf(" %3s",as.name());
-		    }
-		    else if (0x20 < bb && 0x7f > bb){
-
-			out.printf(" %3c",bb);
-		    }
-		    else {
-
-			out.printf(" %03X",bb);
-		    }
-		    break;
-
-		case HEX:
-		    out.printf(" %02X",bb);
-		    break;
-
-		default:
-		    throw new IllegalStateException(this.format.name());
-		}
+		content( (b[i] & 0xFF), out);
 	    }
 
 	    out.println();
 	}
 
-	out.printf("%07d%n",p);
+	offset(out);
+	out.println();
+    }
+    public boolean print(RandomAccessBuffer rabu){
+
+	return this.print(rabu,System.out);
+    }
+    public boolean print(RandomAccessBuffer rabu, PrintStream out){
+
+	Buffer b = rabu.buffer;
+	Window w = rabu.window;
+	State s = rabu.state;
+
+	int i = b.internal(w,s);
+	int q = b.available(w,s);
+
+	if (b.bounds(w,i,q)){
+
+	    this.print(b.buffer,i,q,out);
+
+	    return true;
+	}
+	else {
+	    return false;
+	}
     }
 }
