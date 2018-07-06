@@ -23,6 +23,17 @@ import java.io.PrintStream;
  * Data structure inspection operator may call {@link BufferPrinter}.
  */
 public interface Component {
-
+    /**
+     * Unstructured line printer 
+     * 
+     * @param out Output target (device)
+     */
     public void println(PrintStream out);
+    /**
+     * Structured line printer with tree depth indent
+     * 
+     * @param depth Tree depth from zero is an indent operator
+     * @param out Output target (device)
+     */
+    public void println(int depth, PrintStream out);
 }
