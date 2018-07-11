@@ -18,6 +18,8 @@
 package syntelos.rabu;
 
 /**
+ * Programmer's window is an abstraction from the file format.
+ * 
  * User constraint translates buffer-external to buffer-internal
  * coordinate space.
  *

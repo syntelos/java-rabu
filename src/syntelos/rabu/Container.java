@@ -21,12 +21,10 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Arrays;
 
 /**
- * Data tree leaf.
- * 
- * A component of an octet stream has an offset and length which
- * define its location.  
+ * Data tree branch.
  * 
  * A component may contain children as the result of parsing and
  * editing the data at its location.  In this case, the output of an
@@ -34,32 +32,15 @@ import java.io.PrintStream;
  * editing of the octet stream produces data buffers, parsers, and
  * editors to contribute to output.
  * 
- * @see Container
+ * A container implements the reading and writing of octet streams by
+ * the use of components to perform parsing and editing.  The
+ * overlapping, intersecting layers of buffers, parsers, and editors
+ * that contribute to output are managed by a container to write a
+ * valid octet stream.
+ * 
+ * @see Component
  */
-public interface Component
-    extends Comparable<Component>
+public interface Container
+    extends Component
 {
-    /**
-     * 
-     */
-    public void read(InputStream in)
-	throws IOException;
-    /**
-     * 
-     */
-    public void write(OutputStream out)
-	throws IOException;
-    /**
-     * Unstructured line printer may call {@link Printer}.
-     * 
-     * @param out Output target (device)
-     */
-    public void println(PrintStream out);
-    /**
-     * Structured line printer with tree depth indent.
-     * 
-     * @param depth Tree depth from zero is an indent operator
-     * @param out Output target (device)
-     */
-    public void println(int depth, PrintStream out);
 }

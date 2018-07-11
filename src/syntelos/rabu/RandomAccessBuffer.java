@@ -35,7 +35,9 @@ import java.io.PrintStream;
 public class RandomAccessBuffer
     extends Object
 {
-
+    /**
+     * Programmer's window is an abstraction from the file format.
+     */
     protected final Window window;
 
     protected final Buffer buffer;

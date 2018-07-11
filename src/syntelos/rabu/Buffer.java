@@ -24,7 +24,7 @@ import java.io.PrintStream;
 
 /**
  * This interface employs an externalized coordinate space to
- * implement a window / aperture constraint.
+ * implement a {@link Window window / aperture} constraint.
  */
 public class Buffer
     extends Printer
