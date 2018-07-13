@@ -17,9 +17,7 @@
  */
 package syntelos.rabu;
 
-import java.io.InputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
 
 /**
@@ -37,17 +35,17 @@ import java.io.PrintStream;
  * @see Container
  */
 public interface Component
-    extends Comparable<Component>
+    extends Location
 {
     /**
      * 
      */
-    public void read(InputStream in)
+    public void read(LocationInputStream in)
 	throws IOException;
     /**
      * 
      */
-    public void write(OutputStream out)
+    public void write(LocationOutputStream out)
 	throws IOException;
     /**
      * Unstructured line printer may call {@link Printer}.
